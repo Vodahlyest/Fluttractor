@@ -12,7 +12,7 @@ packages:
   bg_calculator:
     dependency: "direct main"
     description:
-      path: "lib/packages/bg_calculator"
+      path: "packages/bg_calculator"
       relative: true
     source: path
     version: "1.0.0"
