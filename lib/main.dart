@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:bg_calculator/bg_calculator.dart';
 
 void main() {
-  debugPrint('${Awesome().isAwesome}');
   runApp(const MyApp());
 }
 

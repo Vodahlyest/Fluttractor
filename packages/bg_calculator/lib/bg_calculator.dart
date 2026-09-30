@@ -1,8 +1,9 @@
-/// Support for doing something awesome.
-///
-/// More dartdocs go here.
+/// this library is used for all the calculations in the background
+/// used for:
+/// 1. numerical solving of ODE systems
+/// other functions will be added later
+
 library;
 
-export 'src/bg_calculator_base.dart';
-
-// TODO: Export any libraries intended for clients of this package.
+export 'src/ode_system.dart';
+export 'src/systems/lorenz.dart';
