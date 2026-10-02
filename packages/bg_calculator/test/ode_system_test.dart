@@ -102,4 +102,25 @@ void main() {
       expect(testSystem.variableNames, equals(['x', 'y', 'z']));
     });
   });
+  group("WithParameters test", () {
+    test(
+      "new system with the new set of parameters, other fields are the same",
+      () {
+        RightSide rhsFunction = (t, y, p, dydt) {};
+        OdeSystem test1 = OdeSystem(
+          variableNames: ['x', 'y', 'z'],
+          parameterNames: <String>['sigma', 'rho', 'beta'],
+          parameters: <double>[10.0, 28.0, 8 / 3],
+          rhs: rhsFunction,
+        );
+        //average math metal beta parameter be like:
+        OdeSystem test2 = test1.withParameters([1, 54, 7 / 8]);
+        expect(test1.parameters, equals([10.0, 28.0, 8 / 3]));
+        expect(test2.parameters, equals([1, 54, 7 / 8]));
+        expect(test2.variableNames, equals(test1.variableNames));
+        expect(test2.rhs, same(test1.rhs));
+        expect(() => test1.withParameters([]), throwsArgumentError);
+      },
+    );
+  });
 }

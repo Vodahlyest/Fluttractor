@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:bg_calculator/bg_calculator.dart';
 
 void main() {
   runApp(const MyApp());

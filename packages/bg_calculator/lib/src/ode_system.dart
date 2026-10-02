@@ -41,5 +41,16 @@ class OdeSystem {
     }
   }
 
+  /// returns new system with only parameters changed
+  /// original system does not change.
+  OdeSystem withParameters(List<double> newParameters) {
+    return OdeSystem(
+      variableNames: variableNames,
+      parameterNames: parameterNames,
+      parameters: newParameters,
+      rhs: rhs,
+    );
+  }
+
   int get dimension => variableNames.length;
 }

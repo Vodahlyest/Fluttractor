@@ -1,12 +1,16 @@
-/// this is the Lorenz attractor model implemented in dart form
-/// using OdeSystem class and RightSide typedef
-/// declared in src/ode_system.dart
-/// 
-/// dx/dt = \sigma * (-x + y)
-/// dy/dt = -(x * z) + (\rho * x) - y
-/// dz/dt = (x * y) - (beta * z)
 import '../ode_system.dart';
 
+/// this function evaluates the right-hand side of
+/// equations in the Lorenz's system at the point
+/// defined by state vector
+///
+/// dx/dt = sigma * (-x + y)
+/// dy/dt = -(x * z) + (rho * x) - y
+/// dz/dt = (x * y) - (beta * z)
+///
+/// state - variables in equations [x, y, z]
+/// p - parameters in the equations [sigma, rho, beta]
+/// t - time. Not used as Lorenz system's autonomous
 void lorenzRhs(
   double t,
   List<double> state,
@@ -26,9 +30,13 @@ void lorenzRhs(
   dydt[2] = (x * y) - (beta * z);
 }
 
+/// Lorenz system with classic parameters
+/// sigma = 10
+/// rho = 28
+/// beta = 8/3
 final lorenz = OdeSystem(
-  variableNames: ['x', 'y', 'z'], 
-  parameterNames: ['sigma', 'rho', 'beta'], 
-  parameters: [10, 28, 8/3], 
-  rhs: lorenzRhs
+  variableNames: ['x', 'y', 'z'],
+  parameterNames: ['sigma', 'rho', 'beta'],
+  parameters: [10, 28, 8 / 3],
+  rhs: lorenzRhs,
 );
