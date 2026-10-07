@@ -7,3 +7,5 @@ library;
 
 export 'src/ode_system.dart';
 export 'src/systems/lorenz.dart';
+export 'src/steppers/stepper.dart';
+export 'src/steppers/explicit_euler.dart';
