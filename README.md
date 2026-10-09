@@ -1,6 +1,6 @@
 # fluttractor
 
-A new Flutter project.
+Fluttractor - a desktop app that allows you to draw a plot of any ODE system described by the user
 
 ## Getting Started
 

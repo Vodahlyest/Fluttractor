@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import '../ode_system.dart';
+
 /// interface of a Stepper object. Contract implies having
 /// 1. a step function that takes in the current time, the current state vector, and the step size
 /// 2. an order property that returns the order of the method
@@ -13,4 +15,6 @@ abstract interface class Stepper {
 
   /// returns the order of the method.
   int get order;
+
+  OdeSystem get system;
 }
