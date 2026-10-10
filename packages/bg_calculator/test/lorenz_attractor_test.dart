@@ -1,7 +1,6 @@
 import 'package:bg_calculator/bg_calculator.dart';
 import 'package:test/test.dart';
 import 'dart:typed_data';
-import 'dart:math';
 
 void main(){
   late Trajectory lorenzTrajectory;
