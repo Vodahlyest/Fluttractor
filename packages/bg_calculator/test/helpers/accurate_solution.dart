@@ -8,7 +8,11 @@ List<double> correctSolution(
   OdeSystem system,
   double timePoint,
 ) {
-  final x_t = y0[0] * cos(system.parameters[0] * timePoint) + (y0[1] / system.parameters[0]) * sin(system.parameters[0] * timePoint);
-  final v_t = y0[1] * cos(system.parameters[0] * timePoint) - y0[0] * system.parameters[0] * sin(system.parameters[0] * timePoint);
+  final x_t =
+      y0[0] * cos(system.parameters[0] * timePoint) +
+      (y0[1] / system.parameters[0]) * sin(system.parameters[0] * timePoint);
+  final v_t =
+      y0[1] * cos(system.parameters[0] * timePoint) -
+      y0[0] * system.parameters[0] * sin(system.parameters[0] * timePoint);
   return <double>[x_t, v_t];
 }
