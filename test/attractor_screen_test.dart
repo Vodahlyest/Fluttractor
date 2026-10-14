@@ -8,7 +8,6 @@ void main() {
     (widget) => widget is CustomPaint && widget.painter is TrajectoryPainter,
     description: 'CustomPaint with TrajectoryPainter',
   );
-
   group('AttractorScreen', () {
     testWidgets('draws the trajectory with TrajectoryPainter', (tester) async {
       await tester.pumpWidget(const MyApp());

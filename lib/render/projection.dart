@@ -8,11 +8,9 @@ Float32List project(
   Trajectory trajectory,
   int hVarIndex,
   int vVarIndex,
-  Size canvasSize,
-  {
-    double padding = 20,
-  }
-) {
+  Size canvasSize, {
+  double padding = 20,
+}) {
   final projection = Float32List(2 * trajectory.points);
 
   double xMin = double.infinity;
@@ -20,22 +18,10 @@ Float32List project(
   double zMin = double.infinity;
   double zMax = double.negativeInfinity;
   for (int i = 0; i < trajectory.points; i++) {
-    xMin = min(
-      xMin,
-      trajectory.states[(i * trajectory.dimension) + hVarIndex],
-    );
-    xMax = max(
-      xMax,
-      trajectory.states[(i * trajectory.dimension) + hVarIndex],
-    );
-    zMin = min(
-      zMin,
-      trajectory.states[(i * trajectory.dimension) + vVarIndex],
-    );
-    zMax = max(
-      zMax,
-      trajectory.states[(i * trajectory.dimension) + vVarIndex],
-    );
+    xMin = min(xMin, trajectory.states[(i * trajectory.dimension) + hVarIndex]);
+    xMax = max(xMax, trajectory.states[(i * trajectory.dimension) + hVarIndex]);
+    zMin = min(zMin, trajectory.states[(i * trajectory.dimension) + vVarIndex]);
+    zMax = max(zMax, trajectory.states[(i * trajectory.dimension) + vVarIndex]);
   }
 
   if (zMax - zMin == 0 && xMax - xMin == 0) {
