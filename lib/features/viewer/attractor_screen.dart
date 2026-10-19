@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:bg_calculator/bg_calculator.dart';
 import 'package:fluttractor/render/trajectory_painter.dart';
+import 'package:fluttractor/render/camera.dart';
+import 'package:fluttractor/render/bounding_sphere.dart';
 
 import 'dart:typed_data';
 
@@ -13,10 +15,16 @@ class AttractorScreen extends StatefulWidget {
 
 class _AttractorScreenState extends State<AttractorScreen> {
   late final Trajectory _systemTrajectory;
+  late Camera _camera;
+  late final ({double cx, double cy, double cz, double radius}) _sphere;
+  final xIndex = 0;
+  final yIndex = 1;
+  final zIndex = 2;
 
   @override
   void initState() {
     super.initState();
+    _camera = (yaw: 0.0, pitch: 0.0);
     _systemTrajectory = integrate(
       Rk4(system: lorenz),
       Float64List.fromList([1.0, 1.0, 1.0]),
@@ -24,18 +32,28 @@ class _AttractorScreenState extends State<AttractorScreen> {
       50,
       0.01,
     );
+    _sphere = boundingSphere(_systemTrajectory, xIndex, yIndex, zIndex);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SizedBox.expand(
-        child: CustomPaint(
-          painter: TrajectoryPainter(
-            trajectory: _systemTrajectory,
-            hIndex: 0,
-            vIndex: 2,
-            pointColor: Theme.of(context).colorScheme.primary,
+        child: GestureDetector(
+          onPanUpdate: (details) => setState(() {
+            _camera = orbit(_camera, details.delta);
+          }),
+          behavior: HitTestBehavior.opaque,
+          child: CustomPaint(
+            painter: TrajectoryPainter(
+              trajectory: _systemTrajectory,
+              xindex: xIndex,
+              yindex: yIndex,
+              zindex: zIndex,
+              pointColor: Theme.of(context).colorScheme.primary,
+              camera: _camera,
+              sphere: _sphere,
+            ),
           ),
         ),
       ),

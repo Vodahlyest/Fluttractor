@@ -55,3 +55,32 @@ Float32List project(
 
   return projection;
 }
+
+/// this function expects a rotated trajectory
+/// with center at (0, 0, 0) and dimension of 3
+Float32List projectFixed(
+  Trajectory rotated,
+  Size canvasSize,
+  double radius, {
+  double padding = 20,
+}) {
+  assert(rotated.dimension == 3, "wrong dimensions! ${rotated.dimension}");
+  assert(radius >= 0, "radius gotta be >= 0: $radius");
+  final projection = Float32List(2 * rotated.points);
+  final scale = radius != 0
+      ? (min(canvasSize.width, canvasSize.height) - 2 * padding) / (2 * radius)
+      : (min(canvasSize.width, canvasSize.height) - 2 * padding) / 2;
+
+  for (int i = 0; i < rotated.points; i++) {
+    final px =
+        (canvasSize.width / 2) +
+        ((rotated.states[(i * rotated.dimension)])) * scale;
+    final py =
+        (canvasSize.height / 2) -
+        ((rotated.states[(i * rotated.dimension) + 2])) * scale;
+    projection[i * 2] = px;
+    projection[(i * 2) + 1] = py;
+  }
+
+  return projection;
+}

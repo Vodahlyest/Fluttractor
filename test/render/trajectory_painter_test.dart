@@ -17,15 +17,21 @@ void main() {
       );
       final painter1 = TrajectoryPainter(
         trajectory: systemTrajectory1,
-        hIndex: 0,
-        vIndex: 2,
+        xindex: 0,
+        yindex: 1,
+        zindex: 2,
         pointColor: Colors.blue,
+        camera: (yaw: 0, pitch: 0),
+        sphere: (cx: 0.0, cy: 0.0, cz: 0.0, radius: 0.0),
       );
       final painter2 = TrajectoryPainter(
         trajectory: systemTrajectory1,
-        hIndex: 0,
-        vIndex: 2,
+        xindex: 0,
+        yindex: 1,
+        zindex: 2,
         pointColor: Colors.blue,
+        camera: (yaw: 0, pitch: 0),
+        sphere: (cx: 0.0, cy: 0.0, cz: 0.0, radius: 0.0),
       );
       expect(painter2.shouldRepaint(painter1), isFalse);
     });
@@ -39,15 +45,21 @@ void main() {
       );
       final painter1 = TrajectoryPainter(
         trajectory: systemTrajectory1,
-        hIndex: 0,
-        vIndex: 2,
+        xindex: 2,
+        yindex: 0,
+        zindex: 1,
         pointColor: Colors.blue,
+        camera: (yaw: 0, pitch: 0),
+        sphere: (cx: 0.0, cy: 0.0, cz: 0.0, radius: 0.0),
       );
       final painter2 = TrajectoryPainter(
         trajectory: systemTrajectory1,
-        hIndex: 0,
-        vIndex: 1,
+        xindex: 0,
+        yindex: 1,
+        zindex: 2,
         pointColor: Colors.blue,
+        camera: (yaw: 0, pitch: 0),
+        sphere: (cx: 0.0, cy: 0.0, cz: 0.0, radius: 0.0),
       );
       expect(painter2.shouldRepaint(painter1), isTrue);
     });
@@ -61,15 +73,21 @@ void main() {
       );
       final painter1 = TrajectoryPainter(
         trajectory: systemTrajectory1,
-        hIndex: 0,
-        vIndex: 2,
+        xindex: 0,
+        yindex: 1,
+        zindex: 2,
         pointColor: Colors.blue,
+        camera: (yaw: 0, pitch: 0),
+        sphere: (cx: 0.0, cy: 0.0, cz: 0.0, radius: 0.0),
       );
       final painter2 = TrajectoryPainter(
         trajectory: systemTrajectory1,
-        hIndex: 0,
-        vIndex: 2,
+        xindex: 0,
+        yindex: 1,
+        zindex: 2,
         pointColor: Colors.red,
+        camera: (yaw: 0, pitch: 0),
+        sphere: (cx: 0.0, cy: 0.0, cz: 0.0, radius: 0.0),
       );
       expect(painter2.shouldRepaint(painter1), isTrue);
     });
@@ -90,15 +108,21 @@ void main() {
       );
       final painter1 = TrajectoryPainter(
         trajectory: systemTrajectory1,
-        hIndex: 0,
-        vIndex: 2,
+        xindex: 0,
+        yindex: 1,
+        zindex: 2,
         pointColor: Colors.blue,
+        camera: (yaw: 0, pitch: 0),
+        sphere: (cx: 0.0, cy: 0.0, cz: 0.0, radius: 0.0),
       );
       final painter2 = TrajectoryPainter(
         trajectory: systemTrajectory2,
-        hIndex: 0,
-        vIndex: 2,
+        xindex: 0,
+        yindex: 1,
+        zindex: 2,
         pointColor: Colors.blue,
+        camera: (yaw: 0, pitch: 0),
+        sphere: (cx: 0.0, cy: 0.0, cz: 0.0, radius: 0.0),
       );
       expect(painter2.shouldRepaint(painter1), isTrue);
     });

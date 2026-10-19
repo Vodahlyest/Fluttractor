@@ -15,14 +15,18 @@ void main() {
       expect(trajectoryPaintFinder, findsOneWidget);
     });
 
-    testWidgets('projects x horizontally and z vertically', (tester) async {
+    testWidgets('draws (0, 1, 2) triplet and start camera (0, 0)', (
+      tester,
+    ) async {
       await tester.pumpWidget(const MyApp());
 
       final customPaint = tester.widget<CustomPaint>(trajectoryPaintFinder);
       final painter = customPaint.painter! as TrajectoryPainter;
 
-      expect(painter.hIndex, 0);
-      expect(painter.vIndex, 2);
+      expect(painter.xindex, 0);
+      expect(painter.yindex, 1);
+      expect(painter.zindex, 2);
+      expect(painter.camera, (yaw: 0.0, pitch: 0.0));
     });
 
     testWidgets('canvas fills the whole screen', (tester) async {
