@@ -14,6 +14,7 @@ class TrajectoryPainter extends CustomPainter {
   final int zindex;
   final Color pointColor;
   final Camera camera;
+  final bool antiAlias;
   final ({double cx, double cy, double cz, double radius}) sphere;
 
   const TrajectoryPainter({
@@ -24,6 +25,7 @@ class TrajectoryPainter extends CustomPainter {
     required this.pointColor,
     required this.camera,
     required this.sphere,
+    required this.antiAlias,
   });
 
   @override
@@ -42,7 +44,7 @@ class TrajectoryPainter extends CustomPainter {
       ..color = pointColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.0
-      ..isAntiAlias = true;
+      ..isAntiAlias = antiAlias;
     canvas.drawRawPoints(PointMode.polygon, points, paint);
   }
 
@@ -54,6 +56,7 @@ class TrajectoryPainter extends CustomPainter {
         zindex != oldPainter.zindex ||
         camera != oldPainter.camera ||
         pointColor != oldPainter.pointColor ||
-        sphere != oldPainter.sphere;
+        sphere != oldPainter.sphere ||
+        antiAlias != oldPainter.antiAlias;
   }
 }

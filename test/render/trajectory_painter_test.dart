@@ -23,6 +23,7 @@ void main() {
         pointColor: Colors.blue,
         camera: (yaw: 0, pitch: 0),
         sphere: (cx: 0.0, cy: 0.0, cz: 0.0, radius: 0.0),
+        antiAlias: true,
       );
       final painter2 = TrajectoryPainter(
         trajectory: systemTrajectory1,
@@ -32,6 +33,7 @@ void main() {
         pointColor: Colors.blue,
         camera: (yaw: 0, pitch: 0),
         sphere: (cx: 0.0, cy: 0.0, cz: 0.0, radius: 0.0),
+        antiAlias: true,
       );
       expect(painter2.shouldRepaint(painter1), isFalse);
     });
@@ -51,6 +53,7 @@ void main() {
         pointColor: Colors.blue,
         camera: (yaw: 0, pitch: 0),
         sphere: (cx: 0.0, cy: 0.0, cz: 0.0, radius: 0.0),
+        antiAlias: true,
       );
       final painter2 = TrajectoryPainter(
         trajectory: systemTrajectory1,
@@ -60,6 +63,7 @@ void main() {
         pointColor: Colors.blue,
         camera: (yaw: 0, pitch: 0),
         sphere: (cx: 0.0, cy: 0.0, cz: 0.0, radius: 0.0),
+        antiAlias: true,
       );
       expect(painter2.shouldRepaint(painter1), isTrue);
     });
@@ -79,6 +83,7 @@ void main() {
         pointColor: Colors.blue,
         camera: (yaw: 0, pitch: 0),
         sphere: (cx: 0.0, cy: 0.0, cz: 0.0, radius: 0.0),
+        antiAlias: true,
       );
       final painter2 = TrajectoryPainter(
         trajectory: systemTrajectory1,
@@ -88,6 +93,7 @@ void main() {
         pointColor: Colors.red,
         camera: (yaw: 0, pitch: 0),
         sphere: (cx: 0.0, cy: 0.0, cz: 0.0, radius: 0.0),
+        antiAlias: true,
       );
       expect(painter2.shouldRepaint(painter1), isTrue);
     });
@@ -114,6 +120,7 @@ void main() {
         pointColor: Colors.blue,
         camera: (yaw: 0, pitch: 0),
         sphere: (cx: 0.0, cy: 0.0, cz: 0.0, radius: 0.0),
+        antiAlias: true,
       );
       final painter2 = TrajectoryPainter(
         trajectory: systemTrajectory2,
@@ -123,6 +130,7 @@ void main() {
         pointColor: Colors.blue,
         camera: (yaw: 0, pitch: 0),
         sphere: (cx: 0.0, cy: 0.0, cz: 0.0, radius: 0.0),
+        antiAlias: true,
       );
       expect(painter2.shouldRepaint(painter1), isTrue);
     });

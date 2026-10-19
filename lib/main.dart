@@ -15,6 +15,7 @@ class MyApp extends StatelessWidget {
       title: 'Fluttractor',
       theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
       home: const AttractorScreen(),
+      showPerformanceOverlay: true,
     );
   }
 }
