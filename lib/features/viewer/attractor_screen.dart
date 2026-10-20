@@ -18,6 +18,7 @@ class _AttractorScreenState extends State<AttractorScreen> {
   late Trajectory _systemTrajectory;
   Density _density = Density.low;
   bool _antiAliasState = false;
+  bool _decimationRule = false;
   late double _calculationTime;
   Camera _camera = (yaw: 0.0, pitch: 0.0);
   late ({double cx, double cy, double cz, double radius}) _sphere;
@@ -68,6 +69,7 @@ class _AttractorScreenState extends State<AttractorScreen> {
                   camera: _camera,
                   sphere: _sphere,
                   antiAlias: _antiAliasState,
+                  useDecimation: _decimationRule,
                 ),
               ),
             ),
@@ -112,6 +114,21 @@ class _AttractorScreenState extends State<AttractorScreen> {
                           onChanged: (bool value) {
                             setState(() {
                               _antiAliasState = value;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text("decimation: "),
+                        SizedBox(width: 8),
+                        Switch(
+                          value: _decimationRule,
+                          onChanged: (bool value) {
+                            setState(() {
+                              _decimationRule = value;
                             });
                           },
                         ),

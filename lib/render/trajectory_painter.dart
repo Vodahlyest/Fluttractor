@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bg_calculator/bg_calculator.dart';
+import 'package:fluttractor/render/decimation.dart';
 
 import 'dart:ui';
 
@@ -15,6 +16,7 @@ class TrajectoryPainter extends CustomPainter {
   final Color pointColor;
   final Camera camera;
   final bool antiAlias;
+  final bool useDecimation;
   final ({double cx, double cy, double cz, double radius}) sphere;
 
   const TrajectoryPainter({
@@ -26,6 +28,7 @@ class TrajectoryPainter extends CustomPainter {
     required this.camera,
     required this.sphere,
     required this.antiAlias,
+    required this.useDecimation,
   });
 
   @override
@@ -45,7 +48,11 @@ class TrajectoryPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.0
       ..isAntiAlias = antiAlias;
-    canvas.drawRawPoints(PointMode.polygon, points, paint);
+    canvas.drawRawPoints(
+      PointMode.polygon,
+      useDecimation ? decimate(points) : points,
+      paint,
+    );
   }
 
   @override
@@ -57,6 +64,7 @@ class TrajectoryPainter extends CustomPainter {
         camera != oldPainter.camera ||
         pointColor != oldPainter.pointColor ||
         sphere != oldPainter.sphere ||
-        antiAlias != oldPainter.antiAlias;
+        antiAlias != oldPainter.antiAlias ||
+        useDecimation != oldPainter.useDecimation;
   }
 }

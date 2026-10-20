@@ -24,6 +24,7 @@ void main() {
         camera: (yaw: 0, pitch: 0),
         sphere: (cx: 0.0, cy: 0.0, cz: 0.0, radius: 0.0),
         antiAlias: true,
+        useDecimation: true,
       );
       final painter2 = TrajectoryPainter(
         trajectory: systemTrajectory1,
@@ -34,6 +35,7 @@ void main() {
         camera: (yaw: 0, pitch: 0),
         sphere: (cx: 0.0, cy: 0.0, cz: 0.0, radius: 0.0),
         antiAlias: true,
+        useDecimation: true,
       );
       expect(painter2.shouldRepaint(painter1), isFalse);
     });
@@ -54,6 +56,7 @@ void main() {
         camera: (yaw: 0, pitch: 0),
         sphere: (cx: 0.0, cy: 0.0, cz: 0.0, radius: 0.0),
         antiAlias: true,
+        useDecimation: true,
       );
       final painter2 = TrajectoryPainter(
         trajectory: systemTrajectory1,
@@ -64,6 +67,7 @@ void main() {
         camera: (yaw: 0, pitch: 0),
         sphere: (cx: 0.0, cy: 0.0, cz: 0.0, radius: 0.0),
         antiAlias: true,
+        useDecimation: true,
       );
       expect(painter2.shouldRepaint(painter1), isTrue);
     });
@@ -84,6 +88,7 @@ void main() {
         camera: (yaw: 0, pitch: 0),
         sphere: (cx: 0.0, cy: 0.0, cz: 0.0, radius: 0.0),
         antiAlias: true,
+        useDecimation: true,
       );
       final painter2 = TrajectoryPainter(
         trajectory: systemTrajectory1,
@@ -94,6 +99,7 @@ void main() {
         camera: (yaw: 0, pitch: 0),
         sphere: (cx: 0.0, cy: 0.0, cz: 0.0, radius: 0.0),
         antiAlias: true,
+        useDecimation: true,
       );
       expect(painter2.shouldRepaint(painter1), isTrue);
     });
@@ -121,6 +127,7 @@ void main() {
         camera: (yaw: 0, pitch: 0),
         sphere: (cx: 0.0, cy: 0.0, cz: 0.0, radius: 0.0),
         antiAlias: true,
+        useDecimation: true,
       );
       final painter2 = TrajectoryPainter(
         trajectory: systemTrajectory2,
@@ -131,6 +138,7 @@ void main() {
         camera: (yaw: 0, pitch: 0),
         sphere: (cx: 0.0, cy: 0.0, cz: 0.0, radius: 0.0),
         antiAlias: true,
+        useDecimation: true,
       );
       expect(painter2.shouldRepaint(painter1), isTrue);
     });
