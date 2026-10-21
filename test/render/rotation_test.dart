@@ -1,7 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluttractor/render/rotation.dart';
-import 'package:fluttractor/render/camera.dart';
 
 import '../helpers/trajectory_init.dart';
 

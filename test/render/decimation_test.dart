@@ -4,11 +4,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fluttractor/render/decimation.dart';
 
 void main() {
-  test("nothing to exclude -> returned array is the same length", () {
-    final testProjection = Float32List.fromList([0, 0, 5, 0, 10, 0]);
-    final decimated = decimate(testProjection);
-    expect(decimated.length, equals(6));
-  });
+  test(
+    "nothing to exclude -> returned array is the same length and same points",
+    () {
+      final testProjection = Float32List.fromList([0, 0, 5, 0, 10, 0]);
+      final decimated = decimate(testProjection);
+      final expectedDecimation = Float32List.fromList([0, 0, 5, 0, 10, 0]);
+      expect(decimated.length, equals(6));
+      for (int i = 0; i < decimated.length; i++) {
+        expect(decimated[i], closeTo(expectedDecimation[i], 1e-12));
+      }
+    },
+  );
   test("decimation works, first and last point remains", () {
     final testProjection = Float32List.fromList([0, 0, 0.1, 0, 0.2, 0, 0.3, 0]);
     final decimated = decimate(testProjection);
@@ -54,15 +61,15 @@ void main() {
     final testInput2 = Float32List.fromList([1.0, 2.0]);
     final decimation1 = decimate(testInput1);
     final decimation2 = decimate(testInput2);
-    expect(testInput1, equals(decimation1));
-    expect(testInput2, equals(decimation2));
+    expect(decimation1, equals(testInput1));
+    expect(decimation2, equals(testInput2));
   });
   test("last point remains even if smaller that the margin", () {
     final testProjection = Float32List.fromList([0, 0, 5, 0, 5.3, 0]);
     final decimated = decimate(testProjection);
     expect(decimated.length, equals(testProjection.length));
     for (int i = 0; i < testProjection.length; i++) {
-      expect(testProjection[i], closeTo(decimated[i], 1e-12));
+      expect(decimated[i], closeTo(testProjection[i], 1e-12));
     }
   });
   test("one of the distances is equal to the margin", () {

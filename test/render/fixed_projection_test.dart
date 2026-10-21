@@ -1,10 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluttractor/render/projection.dart';
-import 'package:bg_calculator/bg_calculator.dart';
 
 import '../helpers/trajectory_init.dart';
 
-import 'dart:typed_data';
 import 'dart:ui';
 
 void main() {
