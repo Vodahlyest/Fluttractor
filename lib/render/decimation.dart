@@ -1,12 +1,27 @@
 import 'dart:typed_data';
 
-/// Removes certain points from
-/// the projection according to the Radial Distance
-/// polyline simplification rule for better performance
-/// arguments
-/// 1. projected - a list of ODE points projected in px
-/// 2. minDistance - decimation parameter, 1 by default
-/// 
+/// Simplifies a polyline of screen points by dropping every point that
+/// lies closer than [minDistance] to the last kept point.
+///
+/// [projected] is a flat list of `(x, y)` pairs in logical pixels, as
+/// returned by `projectFixed`. Its length must be even.
+///
+/// This is the radial distance simplification: a single O(n) pass that
+/// compares each point with the last *kept* point rather than with its
+/// immediate predecessor, so a slow drift of many short steps is still
+/// preserved.
+///
+/// Guarantees:
+/// * the first and the last points are always kept;
+/// * every dropped point lies within [minDistance] of a kept point, so the
+///   result deviates from the input by at most [minDistance] pixels;
+/// * [projected] is never modified.
+///
+/// If [projected] contains fewer than two points, the result is a view of
+/// [projected] rather than a copy.
+///
+/// In debug mode, throws an [AssertionError] if the length of [projected]
+/// is odd or [minDistance] is negative.
 Float32List decimate(Float32List projected, {double minDistance = 1.0}) {
   assert(
     projected.length % 2 == 0,
