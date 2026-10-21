@@ -77,8 +77,7 @@ void main() {
         system.parameters[1] *
             ((((1.5 * 1.5 * 1.5) - (0.5 * 0.5 * 0.5)) / 6) -
                 ((0.5 * 0.5) * ((1.5 - 0.5) / 2)));
-    final vt =
-        y0[1] + (system.parameters[1] * ((1.5 * 1.5) - (0.5 * 0.5)) / 2);
+    final vt = y0[1] + (system.parameters[1] * ((1.5 * 1.5) - (0.5 * 0.5)) / 2);
     expect(
       trajectory.stateAt(trajectory.time.length - 1)[0],
       closeTo(xt, 1e-12),

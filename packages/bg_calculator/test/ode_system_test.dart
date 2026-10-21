@@ -8,7 +8,7 @@ void main() {
         variableNames: <String>['x', 'y', 'z'],
         parameterNames: <String>['sigma', 'rho', 'beta'],
         parameters: <double>[10.0, 28.0, 8 / 3],
-        rhs: (t, y, p, dydt) {}
+        rhs: (t, y, p, dydt) {},
       );
       expect(testSystem.dimension, equals(3));
     });
