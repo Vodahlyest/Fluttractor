@@ -51,19 +51,19 @@ void main() {
     final method = Rk4(system: system);
     final trajectory = integrate(method, y0, 0, 1, 0.01);
     final timePoint = trajectory.time[trajectory.time.length - 1];
-    final x_t =
+    final xt =
         y0[0] * cos(system.parameters[0] * timePoint) +
         (y0[1] / system.parameters[0]) * sin(system.parameters[0] * timePoint);
-    final v_t =
+    final vt =
         y0[1] * cos(system.parameters[0] * timePoint) -
         y0[0] * system.parameters[0] * sin(system.parameters[0] * timePoint);
     expect(
       trajectory.stateAt(trajectory.time.length - 1)[0],
-      closeTo(x_t, 1e-7),
+      closeTo(xt, 1e-7),
     );
     expect(
       trajectory.stateAt(trajectory.time.length - 1)[1],
-      closeTo(v_t, 1e-7),
+      closeTo(vt, 1e-7),
     );
   });
   test("accuracy test: omega = 0", () {
@@ -71,21 +71,21 @@ void main() {
     final y0 = Float64List.fromList([2, -3]);
     final method = Rk4(system: system);
     final trajectory = integrate(method, y0, 0.5, 1.5, 0.1);
-    final x_t =
+    final xt =
         y0[0] +
         (y0[1] * (1.5 - 0.5)) +
         system.parameters[1] *
             ((((1.5 * 1.5 * 1.5) - (0.5 * 0.5 * 0.5)) / 6) -
                 ((0.5 * 0.5) * ((1.5 - 0.5) / 2)));
-    final v_t =
+    final vt =
         y0[1] + (system.parameters[1] * ((1.5 * 1.5) - (0.5 * 0.5)) / 2);
     expect(
       trajectory.stateAt(trajectory.time.length - 1)[0],
-      closeTo(x_t, 1e-12),
+      closeTo(xt, 1e-12),
     );
     expect(
       trajectory.stateAt(trajectory.time.length - 1)[1],
-      closeTo(v_t, 1e-12),
+      closeTo(vt, 1e-12),
     );
   });
   test("accuracy test: euler's method", () {
@@ -95,19 +95,19 @@ void main() {
     final trajectory = integrate(method, y0, 0, 1, 0.00001);
     expect(trajectory.points, equals(100001));
     final timePoint = trajectory.time[trajectory.time.length - 1];
-    final x_t =
+    final xt =
         y0[0] * cos(system.parameters[0] * timePoint) +
         (y0[1] / system.parameters[0]) * sin(system.parameters[0] * timePoint);
-    final v_t =
+    final vt =
         y0[1] * cos(system.parameters[0] * timePoint) -
         y0[0] * system.parameters[0] * sin(system.parameters[0] * timePoint);
     expect(
       trajectory.stateAt(trajectory.time.length - 1)[0],
-      closeTo(x_t, 1e-3),
+      closeTo(xt, 1e-3),
     );
     expect(
       trajectory.stateAt(trajectory.time.length - 1)[1],
-      closeTo(v_t, 1e-3),
+      closeTo(vt, 1e-3),
     );
   });
 }

@@ -4,61 +4,56 @@ import 'package:bg_calculator/bg_calculator.dart';
 void main() {
   group('correct system works', () {
     test('dimension is equal to the amount of passed variables', () {
-      RightSide rhsFunction = (t, y, p, dydt) {};
       OdeSystem testSystem = OdeSystem(
         variableNames: <String>['x', 'y', 'z'],
         parameterNames: <String>['sigma', 'rho', 'beta'],
         parameters: <double>[10.0, 28.0, 8 / 3],
-        rhs: rhsFunction,
+        rhs: (t, y, p, dydt) {}
       );
       expect(testSystem.dimension, equals(3));
     });
   });
   group('incorrect systems', () {
     test('no variables provided', () {
-      RightSide rhsFunction = (t, y, p, dydt) {};
       expect(
         () => OdeSystem(
           variableNames: <String>[],
           parameterNames: <String>['sigma', 'rho', 'beta'],
           parameters: <double>[10.0, 28.0, 8 / 3],
-          rhs: rhsFunction,
+          rhs: (t, y, p, dydt) {},
         ),
         throwsArgumentError,
       );
     });
     test('parameter values don`t match the amount of parameter names', () {
-      RightSide rhsFunction = (t, y, p, dydt) {};
       expect(
         () => OdeSystem(
           variableNames: <String>['x', 'y', 'z'],
           parameterNames: <String>['sigma', 'rho'],
           parameters: <double>[10.0, 28.0, 8 / 3],
-          rhs: rhsFunction,
+          rhs: (t, y, p, dydt) {},
         ),
         throwsArgumentError,
       );
     });
     test('non-unique variables don`t pass', () {
-      RightSide rhsFunction = (t, y, p, dydt) {};
       expect(
         () => OdeSystem(
           variableNames: <String>['x', 'y', 'y'],
           parameterNames: <String>['sigma', 'rho', 'beta'],
           parameters: <double>[10.0, 28.0, 8 / 3],
-          rhs: rhsFunction,
+          rhs: (t, y, p, dydt) {},
         ),
         throwsArgumentError,
       );
     });
     test('non-unique param-s don`t pass', () {
-      RightSide rhsFunction = (t, y, p, dydt) {};
       expect(
         () => OdeSystem(
           variableNames: <String>['x', 'y', 'z'],
           parameterNames: <String>['sigma', 'rho', 'rho'],
           parameters: <double>[10.0, 28.0, 8 / 3],
-          rhs: rhsFunction,
+          rhs: (t, y, p, dydt) {},
         ),
         throwsArgumentError,
       );
@@ -66,22 +61,20 @@ void main() {
   });
   group('immutability check', () {
     test('.add for variables throws error', () {
-      RightSide rhsFunction = (t, y, p, dydt) {};
       OdeSystem testSystem = OdeSystem(
         variableNames: <String>['x', 'y', 'z'],
         parameterNames: <String>['sigma', 'rho', 'beta'],
         parameters: <double>[10.0, 28.0, 8 / 3],
-        rhs: rhsFunction,
+        rhs: (t, y, p, dydt) {},
       );
       expect(() => testSystem.variableNames.add('w'), throwsUnsupportedError);
     });
     test('.add for parameters throws', () {
-      RightSide rhsFunction = (t, y, p, dydt) {};
       OdeSystem testSystem = OdeSystem(
         variableNames: <String>['x', 'y', 'z'],
         parameterNames: <String>['sigma', 'rho', 'beta'],
         parameters: <double>[10.0, 28.0, 8 / 3],
-        rhs: rhsFunction,
+        rhs: (t, y, p, dydt) {},
       );
       expect(
         () => testSystem.parameterNames.add('alpha'),
@@ -90,13 +83,12 @@ void main() {
       expect(() => testSystem.parameters.add(5.0), throwsUnsupportedError);
     });
     test('protected copy', () {
-      RightSide rhsFunction = (t, y, p, dydt) {};
       List<String> separateVariables = ['x', 'y', 'z'];
       OdeSystem testSystem = OdeSystem(
         variableNames: separateVariables,
         parameterNames: <String>['sigma', 'rho', 'beta'],
         parameters: <double>[10.0, 28.0, 8 / 3],
-        rhs: rhsFunction,
+        rhs: (t, y, p, dydt) {},
       );
       separateVariables.add('w');
       expect(testSystem.variableNames, equals(['x', 'y', 'z']));
@@ -106,12 +98,11 @@ void main() {
     test(
       "new system with the new set of parameters, other fields are the same",
       () {
-        RightSide rhsFunction = (t, y, p, dydt) {};
         OdeSystem test1 = OdeSystem(
           variableNames: ['x', 'y', 'z'],
           parameterNames: <String>['sigma', 'rho', 'beta'],
           parameters: <double>[10.0, 28.0, 8 / 3],
-          rhs: rhsFunction,
+          rhs: (t, y, p, dydt) {},
         );
         //average math metal beta parameter be like:
         OdeSystem test2 = test1.withParameters([1, 54, 7 / 8]);

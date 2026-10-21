@@ -3,6 +3,10 @@ import 'dart:typed_data';
 /// Removes certain points from
 /// the projection according to the Radial Distance
 /// polyline simplification rule for better performance
+/// arguments
+/// 1. projected - a list of ODE points projected in px
+/// 2. minDistance - decimation parameter, 1 by default
+/// 
 Float32List decimate(Float32List projected, {double minDistance = 1.0}) {
   assert(
     projected.length % 2 == 0,

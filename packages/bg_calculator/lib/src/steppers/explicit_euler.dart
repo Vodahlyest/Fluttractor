@@ -8,6 +8,7 @@ class ExplicitEuler implements Stepper {
   ExplicitEuler({required this.system})
     : _kBuff = Float64List(system.dimension);
 
+  @override
   final OdeSystem system;
   final Float64List _kBuff;
   @override

@@ -12,6 +12,7 @@ class Rk4 implements Stepper {
       _k3Buff = Float64List(system.dimension),
       _k4Buff = Float64List(system.dimension),
       _tempBuff = Float64List(system.dimension);
+  @override
   final OdeSystem system;
   final Float64List _k1Buff;
   final Float64List _k2Buff;
