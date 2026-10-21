@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bg_calculator/bg_calculator.dart';
+import 'package:fluttractor/render/decimation.dart';
 
 import 'dart:ui';
 
@@ -43,7 +44,7 @@ class TrajectoryPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.0
       ..isAntiAlias = true;
-    canvas.drawRawPoints(PointMode.polygon, points, paint);
+    canvas.drawRawPoints(PointMode.polygon, decimate(points), paint);
   }
 
   @override
