@@ -1,7 +1,7 @@
 import 'package:bg_calculator/bg_calculator.dart';
 
 Trajectory trajectoryInit(List<List<double>> points) {
-  assert(points.isNotEmpty, "fill the points, man. Not cool");
+  assert(points.isNotEmpty, "points should contain at least one point: ${points.length}");
   for (int i = 0; i < points.length - 1; i++) {
     assert(
       points[i].length == points[i + 1].length,
