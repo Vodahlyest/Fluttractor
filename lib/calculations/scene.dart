@@ -1,7 +1,8 @@
 import 'dart:typed_data';
+import 'dart:isolate';
 import 'package:bg_calculator/bg_calculator.dart';
 import 'package:fluttractor/calculations/sphere.dart';
-import 'package:fluttractor/render/bounding_sphere.dart';
+import 'package:fluttractor/calculations/bounding_sphere.dart';
 
 /// defines a type for a record that contains Ode soulution
 /// [trajectory] and bounding sphere of it [sphere]
@@ -37,4 +38,26 @@ Scene computeScene({
     trajectory: trajectory,
     sphere: boundingSphere(trajectory, xIndex, yIndex, zIndex),
   );
+}
+
+Future<Scene> computeSceneInIsolate({
+  required Stepper stepper,
+  required Float64List y0,
+  required double t0,
+  required double tEnd,
+  required double h,
+  required int xIndex,
+  required int yIndex,
+  required int zIndex,
+}) {
+  return Isolate.run(() => computeScene(
+    stepper: stepper, 
+    y0: y0, 
+    t0: t0, 
+    tEnd: tEnd, 
+    h: h, 
+    xIndex: xIndex, 
+    yIndex: yIndex, 
+    zIndex: zIndex
+  ));
 }

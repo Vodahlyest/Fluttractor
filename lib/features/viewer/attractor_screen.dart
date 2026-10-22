@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:bg_calculator/bg_calculator.dart';
 import 'package:fluttractor/render/trajectory_painter.dart';
 import 'package:fluttractor/render/camera.dart';
-import 'package:fluttractor/render/bounding_sphere.dart';
+import 'package:fluttractor/calculations/bounding_sphere.dart';
 import 'package:fluttractor/calculations/sphere.dart';
 
 import 'dart:typed_data';

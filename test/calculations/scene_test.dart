@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:bg_calculator/bg_calculator.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluttractor/calculations/scene.dart';
-import 'package:fluttractor/render/bounding_sphere.dart';
+import 'package:fluttractor/calculations/bounding_sphere.dart';
 
 void main() {
   final stepper = Rk4(system: lorenz);

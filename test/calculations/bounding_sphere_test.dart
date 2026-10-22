@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/trajectory_init.dart';
 
-import 'package:fluttractor/render/bounding_sphere.dart';
+import 'package:fluttractor/calculations/bounding_sphere.dart';
 
 import 'dart:math';
 
