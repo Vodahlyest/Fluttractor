@@ -15,7 +15,8 @@
 | Built-in Lorenz system | ✅ done (core) |
 | 3D view of a trajectory with mouse-controlled camera rotation | ✅ done (single view) |
 | Constant scale while rotating (bounding-sphere fit) | ✅ done |
-| Computation in a background isolate | 📋 planned |
+| Screen-space decimation of dense trajectories (~15× faster rasterisation) | ✅ done |
+| Computation in a background isolate | 🚧 in progress |
 | Several views at once (user-selected triples of variables) | 📋 planned |
 | Adaptive step size (Dormand–Prince 5(4)) | 📋 planned |
 | Implicit method for stiff systems | 📋 planned |
@@ -45,11 +46,15 @@ fluttractor/
 │   ├── features/
 │   │   └── viewer/
 │   │       └── attractor_screen.dart   # screen: computes the trajectory, handles mouse drag
+│   ├── calculations/                   # pure computations behind a view (no Flutter widgets)
+│   │   ├── sphere.dart                 # Sphere record type
+│   │   ├── bounding_sphere.dart        # centre and radius of the visible triple of variables
+│   │   └── scene.dart                  # Scene = trajectory + bounding sphere; computeScene()
 │   └── render/                         # pure functions + painter
-│       ├── bounding_sphere.dart        # centre and radius of the visible triple of variables
 │       ├── camera.dart                 # camera angles, mouse drag → angles
 │       ├── rotation.dart               # turntable rotation (yaw, pitch) about a centre
 │       ├── projection.dart             # 3D → screen pixels
+│       ├── decimation.dart             # drops sub-pixel points before drawing
 │       └── trajectory_painter.dart     # CustomPainter that draws the trajectory
 ├── test/                               # application tests (mirror lib/)
 ├── packages/
@@ -79,15 +84,21 @@ The numerical core lives in a separate package on purpose: it has no dependency 
  │  AttractorScreen          state: trajectory, bounding sphere (once), camera angles  │
  │        │  mouse drag → orbit() → new camera → setState                              │
  │        ▼                                                                            │
- │  TrajectoryPainter.paint:  rotate()  →  projectFixed()  →  Canvas.drawRawPoints()   │
+ │  TrajectoryPainter.paint:                                                           │
+ │     rotate()  →  projectFixed()  →  decimate()  →  Canvas.drawRawPoints()           │
+ └──────────────────────────────────────▲──────────────────────────────────────────────┘
+                                        │ Trajectory + Sphere
+ ┌────────────────────────── calculations (lib/calculations) ──────────────────────────┐
+ │  computeScene():  integrate()  +  boundingSphere()  →  Scene                        │
  └──────────────────────────────────────▲──────────────────────────────────────────────┘
                                         │ Trajectory
- ┌──────────────────────── bg_calculator (pure Dart) ──────────────────────────────────┐
+ ┌───────────────────────────── bg_calculator (pure Dart) ─────────────────────────────┐
  │  OdeSystem  →  Stepper (Euler, RK4, …)  →  integrate()  →  Trajectory               │
  └─────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 * **Core** computes trajectories: *what* to solve (`OdeSystem`), *how* to make one step (`Stepper`), *how* to walk the whole time interval (`integrate`), *where* to store the result (`Trajectory`).
+* **Calculations** prepare what a view needs: the trajectory and its bounding sphere, bundled as a `Scene`. `computeScene` is a pure function, so it can be moved to a background isolate unchanged (in progress; the screen still calls `integrate` and `boundingSphere` directly).
 * **App** turns a trajectory into pictures. Rotation and projection are pure functions, separated from drawing, so the same projected points can later be sent either to the screen or to a vector file.
 
 ### Rendering pipeline
@@ -96,7 +107,8 @@ The numerical core lives in a separate package on purpose: it has no dependency 
 2. **Bounding sphere** — computed once per trajectory: the centre is the middle of the bounding box, the radius is the largest distance from the centre to a point.
 3. **Rotation** — a turntable camera: *yaw* around the vertical axis, then *pitch* around the horizontal screen axis (limited to ±90°, so the picture never turns upside down). Points are rotated about the sphere centre.
 4. **Orthographic projection** — depth is dropped; the scale is `(min(width, height) − 2·padding) / (2·radius)`. A rotation preserves distances, so the sphere always projects onto the same circle and the attractor keeps its size while being rotated.
-5. **Painting** — `Canvas.drawRawPoints(PointMode.polygon, …)` with a hairline stroke.
+5. **Decimation** — a point is dropped if it lies closer than 1 px on screen to the last kept point (radial-distance simplification). The picture changes by less than a pixel, but a dense trajectory sends ~15× fewer segments to the GPU: 500 001 points shrink to about 30 000, roughly the curve's length in pixels.
+6. **Painting** — `Canvas.drawRawPoints(PointMode.polygon, …)` with a hairline stroke.
 
 ---
 
@@ -145,8 +157,11 @@ The core is checked against problems with known behaviour:
 * **Projection:** corners of the picture, one scale for both axes (aspect ratio is preserved), choice of axes, degenerate cases (a single point, zero span along one axis), padding; a smoke test on the real Lorenz trajectory.
 * **Rotation:** identity, quarter turns (checks signs), *property-based* tests — distances between points and to the centre are preserved; *metamorphic* tests of the choice of variables and of rotation about a centre.
 * **Bounding sphere:** a cube, a single point, box centre vs. arithmetic mean, maximum distance, a 4-variable system with a chosen triple.
+* **Scene:** `computeScene` gives exactly the same result as calling `integrate` and `boundingSphere` directly, and really uses the requested triple of variables.
+* **Decimation:** nothing is dropped when points are far apart; first and last points are always kept; comparison is made with the last *kept* point (slow drift is preserved); the threshold is inclusive; both axes and thresholds other than 1 px are covered. Each test was checked against a deliberately broken implementation (mutation testing).
+* **Painter:** a fake canvas records what is drawn — sub-pixel points collapse to the two end points, points more than 1 px apart are all kept (so the threshold is measured in screen pixels, not in model units).
 * **Camera:** pitch is limited to ±90°.
-* **Widgets:** the screen draws with `TrajectoryPainter`; the canvas fills the window and follows its resize; `shouldRepaint` reacts to every input that changes the picture.
+* **Widgets:** the screen draws with `TrajectoryPainter`; the canvas fills the window and follows its resize; `shouldRepaint` reacts to every input that changes the picture; a horizontal drag changes only yaw, a vertical drag changes only pitch, and a long drag stops pitch exactly at ±90°.
 
 ---
 
