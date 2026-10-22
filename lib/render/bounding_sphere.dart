@@ -1,9 +1,10 @@
 import 'package:bg_calculator/bg_calculator.dart';
 import 'package:collection/collection.dart';
+import 'package:fluttractor/calculations/sphere.dart';
 
 import 'dart:math';
 
-({double cx, double cy, double cz, double radius}) boundingSphere(
+Sphere boundingSphere(
   Trajectory trajectory,
   int xIndex,
   int yIndex,

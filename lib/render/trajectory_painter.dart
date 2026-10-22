@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bg_calculator/bg_calculator.dart';
 import 'package:fluttractor/render/decimation.dart';
+import 'package:fluttractor/calculations/sphere.dart';
 
 import 'dart:ui';
 
@@ -15,7 +16,7 @@ class TrajectoryPainter extends CustomPainter {
   final int zindex;
   final Color pointColor;
   final Camera camera;
-  final ({double cx, double cy, double cz, double radius}) sphere;
+  final Sphere sphere;
 
   const TrajectoryPainter({
     required this.trajectory,

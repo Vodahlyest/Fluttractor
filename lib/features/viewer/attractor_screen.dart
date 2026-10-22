@@ -3,6 +3,7 @@ import 'package:bg_calculator/bg_calculator.dart';
 import 'package:fluttractor/render/trajectory_painter.dart';
 import 'package:fluttractor/render/camera.dart';
 import 'package:fluttractor/render/bounding_sphere.dart';
+import 'package:fluttractor/calculations/sphere.dart';
 
 import 'dart:typed_data';
 
@@ -16,7 +17,7 @@ class AttractorScreen extends StatefulWidget {
 class _AttractorScreenState extends State<AttractorScreen> {
   late final Trajectory _systemTrajectory;
   late Camera _camera;
-  late final ({double cx, double cy, double cz, double radius}) _sphere;
+  late final Sphere _sphere;
   final xIndex = 0;
   final yIndex = 1;
   final zIndex = 2;
