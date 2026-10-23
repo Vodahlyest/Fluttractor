@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fluttractor/main.dart';
 import 'package:fluttractor/render/trajectory_painter.dart';
+
+import 'helpers/pump_app.dart';
 
 import 'dart:math';
 
@@ -12,7 +13,7 @@ void main() {
   );
 
   testWidgets("drag: yaw + 1 rad", (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await pumpApp(tester);
 
     CustomPaint customPaint = tester.widget<CustomPaint>(trajectoryPaintFinder);
     TrajectoryPainter painter = customPaint.painter! as TrajectoryPainter;
@@ -28,7 +29,7 @@ void main() {
     expect(painter.camera.pitch, equals(0.0));
   });
   testWidgets("drag: pitch + 1 rad", (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await pumpApp(tester);
 
     CustomPaint customPaint = tester.widget<CustomPaint>(trajectoryPaintFinder);
     TrajectoryPainter painter = customPaint.painter! as TrajectoryPainter;
@@ -46,7 +47,7 @@ void main() {
   testWidgets("pitching up is strictly limited at +pi / 2 rads", (
     tester,
   ) async {
-    await tester.pumpWidget(const MyApp());
+    await pumpApp(tester);
 
     CustomPaint customPaint = tester.widget<CustomPaint>(trajectoryPaintFinder);
     TrajectoryPainter painter = customPaint.painter! as TrajectoryPainter;
@@ -62,7 +63,7 @@ void main() {
     expect(painter.camera.yaw, equals(0.0));
   });
   testWidgets("pitching down is limited at -pi / 2 rads", (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await pumpApp(tester);
 
     CustomPaint customPaint = tester.widget<CustomPaint>(trajectoryPaintFinder);
     TrajectoryPainter painter = customPaint.painter! as TrajectoryPainter;
