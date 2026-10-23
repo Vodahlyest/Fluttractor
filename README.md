@@ -2,7 +2,7 @@
 
 **Fluttractor** is a desktop application (macOS, Windows) for plotting phase portraits — including strange attractors — of systems of ordinary differential equations (ODEs).
 
-> **Status:** early development. The numerical core is complete and covered by tests. The app shows an interactive 3D view of the Lorenz attractor that can be rotated with the mouse.
+> **Status:** early development. The numerical core is complete and covered by tests. The app shows an interactive 3D view of the Lorenz attractor that can be rotated with the mouse; the trajectory is computed in a background isolate, so the window stays responsive.
 
 ---
 
@@ -16,7 +16,7 @@
 | 3D view of a trajectory with mouse-controlled camera rotation | ✅ done (single view) |
 | Constant scale while rotating (bounding-sphere fit) | ✅ done |
 | Screen-space decimation of dense trajectories (~15× faster rasterisation) | ✅ done |
-| Computation in a background isolate | 🚧 in progress |
+| Computation in a background isolate (Riverpod `FutureProvider`, loading and error states) | ✅ done |
 | Several views at once (user-selected triples of variables) | 📋 planned |
 | Adaptive step size (Dormand–Prince 5(4)) | 📋 planned |
 | Implicit method for stiff systems | 📋 planned |
@@ -29,7 +29,7 @@
 
 ## Usage
 
-The window shows the Lorenz attractor (σ = 10, ρ = 28, β = 8/3), integrated with RK4 from the point (1, 1, 1) on t ∈ [0, 50] with step h = 0.01.
+The window shows the Lorenz attractor (σ = 10, ρ = 28, β = 8/3), integrated with RK4 from the point (1, 1, 1) on t ∈ [0, 50] with step h = 0.01. While the trajectory is being computed, a progress indicator is shown; if the computation fails, the error is shown instead of the picture.
 
 * **Drag horizontally** — rotate the attractor around the vertical axis.
 * **Drag vertically** — tilt the view, from looking straight from above to straight from below.
@@ -42,14 +42,18 @@ The window shows the Lorenz attractor (σ = 10, ρ = 28, β = 8/3), integrated w
 ```
 fluttractor/
 ├── lib/                                # Flutter application
-│   ├── main.dart
+│   ├── main.dart                       # ProviderScope at the root of the app
 │   ├── features/
 │   │   └── viewer/
-│   │       └── attractor_screen.dart   # screen: computes the trajectory, handles mouse drag
+│   │       └── attractor_screen.dart   # screen: loading / error / picture, handles mouse drag
+│   ├── providers/
+│   │   └── scene_provider.dart         # FutureProvider: computes the scene in an isolate
+│   ├── constant_values/
+│   │   └── indices.dart                # default triple of variables shown in the view
 │   ├── calculations/                   # pure computations behind a view (no Flutter widgets)
 │   │   ├── sphere.dart                 # Sphere record type
 │   │   ├── bounding_sphere.dart        # centre and radius of the visible triple of variables
-│   │   └── scene.dart                  # Scene = trajectory + bounding sphere; computeScene()
+│   │   └── scene.dart                  # Scene = trajectory + sphere; computeScene(), …InIsolate()
 │   └── render/                         # pure functions + painter
 │       ├── camera.dart                 # camera angles, mouse drag → angles
 │       ├── rotation.dart               # turntable rotation (yaw, pitch) about a centre
@@ -81,14 +85,19 @@ The numerical core lives in a separate package on purpose: it has no dependency 
 
 ```
  ┌──────────────────────────────── Flutter app (lib/) ─────────────────────────────────┐
- │  AttractorScreen          state: trajectory, bounding sphere (once), camera angles  │
+ │  AttractorScreen      state: camera angles (local, ephemeral)                       │
+ │        │  ref.watch(sceneProvider) → loading │ error │ data(Scene)                  │
  │        │  mouse drag → orbit() → new camera → setState                              │
  │        ▼                                                                            │
  │  TrajectoryPainter.paint:                                                           │
  │     rotate()  →  projectFixed()  →  decimate()  →  Canvas.drawRawPoints()           │
  └──────────────────────────────────────▲──────────────────────────────────────────────┘
-                                        │ Trajectory + Sphere
- ┌────────────────────────── calculations (lib/calculations) ──────────────────────────┐
+                                        │ Scene (trajectory + sphere)
+ ┌─────────────────────────────── providers (Riverpod) ────────────────────────────────┐
+ │  sceneProvider: FutureProvider<Scene>  →  computeSceneInIsolate()                   │
+ └──────────────────────────────────────▲──────────────────────────────────────────────┘
+                                        │ Isolate.run: inputs copied, result moved
+ ┌──────────────── calculations (lib/calculations), background isolate ────────────────┐
  │  computeScene():  integrate()  +  boundingSphere()  →  Scene                        │
  └──────────────────────────────────────▲──────────────────────────────────────────────┘
                                         │ Trajectory
@@ -98,7 +107,8 @@ The numerical core lives in a separate package on purpose: it has no dependency 
 ```
 
 * **Core** computes trajectories: *what* to solve (`OdeSystem`), *how* to make one step (`Stepper`), *how* to walk the whole time interval (`integrate`), *where* to store the result (`Trajectory`).
-* **Calculations** prepare what a view needs: the trajectory and its bounding sphere, bundled as a `Scene`. `computeScene` is a pure function, so it can be moved to a background isolate unchanged (in progress; the screen still calls `integrate` and `boundingSphere` directly).
+* **Calculations** prepare what a view needs: the trajectory and its bounding sphere, bundled as a `Scene`. `computeScene` is a pure function; `computeSceneInIsolate` runs it in a background isolate with `Isolate.run`. The closure captures only the function's own arguments, the inputs are copied into the new isolate and the result is moved back without copying. If the computation throws, the returned `Future` completes with the original error.
+* **Providers** connect calculations to the UI: `sceneProvider` (a Riverpod `FutureProvider`, automatic retry disabled — a computation error is deterministic) exposes the scene as loading / error / data. The camera is *not* in a provider: it is ephemeral state of one view and stays in the widget.
 * **App** turns a trajectory into pictures. Rotation and projection are pure functions, separated from drawing, so the same projected points can later be sent either to the screen or to a vector file.
 
 ### Rendering pipeline
@@ -157,11 +167,13 @@ The core is checked against problems with known behaviour:
 * **Projection:** corners of the picture, one scale for both axes (aspect ratio is preserved), choice of axes, degenerate cases (a single point, zero span along one axis), padding; a smoke test on the real Lorenz trajectory.
 * **Rotation:** identity, quarter turns (checks signs), *property-based* tests — distances between points and to the centre are preserved; *metamorphic* tests of the choice of variables and of rotation about a centre.
 * **Bounding sphere:** a cube, a single point, box centre vs. arithmetic mean, maximum distance, a 4-variable system with a chosen triple.
-* **Scene:** `computeScene` gives exactly the same result as calling `integrate` and `boundingSphere` directly, and really uses the requested triple of variables.
+* **Scene:** `computeScene` gives exactly the same result as calling `integrate` and `boundingSphere` directly, and really uses the requested triple of variables. `computeSceneInIsolate` returns bit-for-bit the same scene as the synchronous version, and an error inside the isolate reaches the caller with its original type.
 * **Decimation:** nothing is dropped when points are far apart; first and last points are always kept; comparison is made with the last *kept* point (slow drift is preserved); the threshold is inclusive; both axes and thresholds other than 1 px are covered. Each test was checked against a deliberately broken implementation (mutation testing).
 * **Painter:** a fake canvas records what is drawn — sub-pixel points collapse to the two end points, points more than 1 px apart are all kept (so the threshold is measured in screen pixels, not in model units).
 * **Camera:** pitch is limited to ±90°.
 * **Widgets:** the screen draws with `TrajectoryPainter`; the canvas fills the window and follows its resize; `shouldRepaint` reacts to every input that changes the picture; a horizontal drag changes only yaw, a vertical drag changes only pitch, and a long drag stops pitch exactly at ±90°.
+* **Loading states:** with the provider overridden, the screen shows a progress indicator while the scene is pending (and keeps showing it however much time passes), switches to the picture once the scene arrives, and shows the error text — including the original message — when the computation fails.
+* **End to end:** one test runs the real provider and the real isolate (in real time, via `tester.runAsync`) and checks that the screen ends up drawing the full 5001-point trajectory.
 
 ---
 
@@ -169,7 +181,7 @@ The core is checked against problems with known behaviour:
 
 1. ~~Numerical core: system description, Euler and RK4, integrator, tests~~
 2. ~~3D view with camera rotation (Lorenz)~~
-3. Computation in a background isolate, state management
+3. ~~Computation in a background isolate, state management~~
 4. Several views: user-selected triples of variables
 5. Adaptive step size (Dormand–Prince)
 6. User-defined equations
