@@ -12,6 +12,8 @@
 |---|---|
 | Systems of ODEs with an arbitrary number of variables and parameters | ✅ done (core) |
 | Fixed-step integrators: explicit Euler, classical Runge–Kutta 4 | ✅ done (core) |
+| Advancing a system in time without storing points (`evolve`) | ✅ done (core) |
+| Discarding the initial part of a trajectory (transient) | ✅ done (parameter, off by default) |
 | Built-in Lorenz system | ✅ done (core) |
 | 3D view of a trajectory with mouse-controlled camera rotation | ✅ done (single view) |
 | Constant scale while rotating (bounding-sphere fit) | ✅ done |
@@ -69,6 +71,7 @@ fluttractor/
 │       │       ├── ode_system.dart     # ODE system description
 │       │       ├── vector_ops.dart     # vector operations (axpy)
 │       │       ├── integrator.dart     # integration loop
+│       │       ├── evolution.dart      # advance in time without storing points
 │       │       ├── trajectory.dart     # trajectory storage
 │       │       ├── steppers/           # numerical methods
 │       │       └── systems/            # built-in systems (Lorenz)
@@ -98,16 +101,17 @@ The numerical core lives in a separate package on purpose: it has no dependency 
  └──────────────────────────────────────▲──────────────────────────────────────────────┘
                                         │ Isolate.run: inputs copied, result moved
  ┌──────────────── calculations (lib/calculations), background isolate ────────────────┐
- │  computeScene():  integrate()  +  boundingSphere()  →  Scene                        │
+ │  computeScene():  evolve()  →  integrate()  +  boundingSphere()  →  Scene           │
  └──────────────────────────────────────▲──────────────────────────────────────────────┘
                                         │ Trajectory
  ┌───────────────────────────── bg_calculator (pure Dart) ─────────────────────────────┐
  │  OdeSystem  →  Stepper (Euler, RK4, …)  →  integrate()  →  Trajectory               │
+ │                                         →  evolve()     →  state at t₁              │
  └─────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-* **Core** computes trajectories: *what* to solve (`OdeSystem`), *how* to make one step (`Stepper`), *how* to walk the whole time interval (`integrate`), *where* to store the result (`Trajectory`).
-* **Calculations** prepare what a view needs: the trajectory and its bounding sphere, bundled as a `Scene`. `computeScene` is a pure function; `computeSceneInIsolate` runs it in a background isolate with `Isolate.run`. The closure captures only the function's own arguments, the inputs are copied into the new isolate and the result is moved back without copying. If the computation throws, the returned `Future` completes with the original error.
+* **Core** computes trajectories: *what* to solve (`OdeSystem`), *how* to make one step (`Stepper`), *how* to walk the whole time interval (`integrate`), *where* to store the result (`Trajectory`). `evolve` walks the interval with exactly the same steps as `integrate` but keeps only the final state — used to skip a transient now, and later for Lyapunov exponents and bifurcation diagrams, where storing whole trajectories is wasteful.
+* **Calculations** prepare what a view needs: the trajectory and its bounding sphere, bundled as a `Scene`. An optional `skipTime` (default 0) discards the initial part of the trajectory: the system is first advanced with `evolve` from t₀ to t₀ + `skipTime`, and only the rest is stored and shown. `computeScene` is a pure function; `computeSceneInIsolate` runs it in a background isolate with `Isolate.run`. The closure captures only the function's own arguments, the inputs are copied into the new isolate and the result is moved back without copying. If the computation throws, the returned `Future` completes with the original error.
 * **Providers** connect calculations to the UI: `sceneProvider` (a Riverpod `FutureProvider`, automatic retry disabled — a computation error is deterministic) exposes the scene as loading / error / data. The camera is *not* in a provider: it is ephemeral state of one view and stays in the widget.
 * **App** turns a trajectory into pictures. Rotation and projection are pure functions, separated from drawing, so the same projected points can later be sent either to the screen or to a vector file.
 
@@ -160,6 +164,7 @@ The core is checked against problems with known behaviour:
 
 * **Harmonic oscillator** (exact solution known): one-step and full-trajectory accuracy; the *observed order of convergence* is ≈ 4.1 for RK4 and ≈ 1.0 for Euler, as theory predicts.
 * **Polynomial forcing** (RK4 is exact for it): checks that time is passed to the method correctly.
+* **`evolve`:** the final state is bit-for-bit equal to the last point of `integrate` on the same interval; advancing to t₁ and then integrating to t₂ gives exactly the same result as integrating from t₀ to t₂ (on a forced oscillator with a power-of-two step, so that both time grids coincide bit for bit; a mutation that forgets the start time is caught); a zero interval returns a copy of the input; the input is never modified; a reversed interval or a non-positive step throws `ArgumentError`.
 * **Lorenz system** (σ = 10, ρ = 28, β = 8/3): right-hand side at known points, fixed points C±, symmetry (x, y, z) → (−x, −y, z); the trajectory stays finite and bounded and keeps switching between the two wings of the attractor.
 
 ### Rendering
@@ -167,7 +172,7 @@ The core is checked against problems with known behaviour:
 * **Projection:** corners of the picture, one scale for both axes (aspect ratio is preserved), choice of axes, degenerate cases (a single point, zero span along one axis), padding; a smoke test on the real Lorenz trajectory.
 * **Rotation:** identity, quarter turns (checks signs), *property-based* tests — distances between points and to the centre are preserved; *metamorphic* tests of the choice of variables and of rotation about a centre.
 * **Bounding sphere:** a cube, a single point, box centre vs. arithmetic mean, maximum distance, a 4-variable system with a chosen triple.
-* **Scene:** `computeScene` gives exactly the same result as calling `integrate` and `boundingSphere` directly, and really uses the requested triple of variables. `computeSceneInIsolate` returns bit-for-bit the same scene as the synchronous version, and an error inside the isolate reaches the caller with its original type.
+* **Scene:** `computeScene` gives exactly the same result as calling `integrate` and `boundingSphere` directly, and really uses the requested triple of variables. `computeSceneInIsolate` returns bit-for-bit the same scene as the synchronous version, and an error inside the isolate reaches the caller with its original type. With `skipTime`, the scene equals the manual chain `evolve` → `integrate`, the trajectory starts exactly at t₀ + `skipTime`, and a `skipTime` not shorter than the whole interval is rejected.
 * **Decimation:** nothing is dropped when points are far apart; first and last points are always kept; comparison is made with the last *kept* point (slow drift is preserved); the threshold is inclusive; both axes and thresholds other than 1 px are covered. Each test was checked against a deliberately broken implementation (mutation testing).
 * **Painter:** a fake canvas records what is drawn — sub-pixel points collapse to the two end points, points more than 1 px apart are all kept (so the threshold is measured in screen pixels, not in model units).
 * **Camera:** pitch is limited to ±90°.
