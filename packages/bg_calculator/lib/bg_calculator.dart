@@ -17,3 +17,4 @@ export 'src/steppers/explicit_euler.dart';
 export 'src/steppers/rk4.dart';
 export 'src/integrator.dart';
 export 'src/trajectory.dart';
+export 'src/evolution.dart';
