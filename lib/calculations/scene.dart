@@ -24,6 +24,9 @@ typedef Scene = ({Trajectory trajectory, Sphere sphere});
 ///              (see Trajectory's declaration in bg_calculator)
 /// - [yIndex] - y of the point's index for the Bounding sphere
 /// - [zIndex] - z of the point's index for the Bounding sphere
+/// - [skipTime] - timespan of the transition process, 0 by default.
+///                trajectory starts at t0 + [skipTime]. if
+///                [skipTime] >= [tEnd] - [t0] throws ArgumentError
 Scene computeScene({
   required Stepper stepper,
   required Float64List y0,
@@ -33,8 +36,15 @@ Scene computeScene({
   required int xIndex,
   required int yIndex,
   required int zIndex,
+  double skipTime = 0.0,
 }) {
-  final trajectory = integrate(stepper, y0, t0, tEnd, h);
+  if (skipTime >= (tEnd - t0)) {
+    throw ArgumentError(
+      "skip time should be strictly less than the time interval: skipTime = $skipTime, t0: $t0, tEnd: $tEnd",
+    );
+  }
+  final evolution = evolve(stepper, y0, t0, t0 + skipTime, h);
+  final trajectory = integrate(stepper, evolution, t0 + skipTime, tEnd, h);
   return (
     trajectory: trajectory,
     sphere: boundingSphere(trajectory, xIndex, yIndex, zIndex),
@@ -59,6 +69,7 @@ Future<Scene> computeSceneInIsolate({
   required int xIndex,
   required int yIndex,
   required int zIndex,
+  double skipTime = 0.0,
 }) {
   return Isolate.run(
     () => computeScene(
@@ -70,6 +81,7 @@ Future<Scene> computeSceneInIsolate({
       xIndex: xIndex,
       yIndex: yIndex,
       zIndex: zIndex,
+      skipTime: skipTime,
     ),
   );
 }

@@ -61,4 +61,70 @@ void main() {
     );
     expect(expectedSphere, isNot(equals(scene.sphere)));
   });
+  test("manual calculations and computeScene = same result", () {
+    final evolution = evolve(stepper, initialState, t0, t0 + 0.01, stepSize);
+    final expectedTrajectory = integrate(
+      stepper,
+      evolution,
+      t0 + 0.01,
+      tEnd,
+      stepSize,
+    );
+    final scene = computeScene(
+      stepper: stepper,
+      y0: initialState,
+      t0: t0,
+      tEnd: tEnd,
+      h: stepSize,
+      xIndex: 0,
+      yIndex: 1,
+      zIndex: 2,
+      skipTime: 0.01,
+    );
+    expect(scene.trajectory.states, equals(expectedTrajectory.states));
+  });
+  test("first point is at t0 + skipTime", () {
+    final scene = computeScene(
+      stepper: stepper,
+      y0: initialState,
+      t0: t0,
+      tEnd: tEnd,
+      h: stepSize,
+      xIndex: 0,
+      yIndex: 1,
+      zIndex: 2,
+      skipTime: 0.01,
+    );
+    expect(scene.trajectory.time[0], equals(t0 + 0.01));
+  });
+  test("skipTime >= t interval -> ArgumentError", () {
+    expect(
+      () => computeScene(
+        stepper: stepper,
+        y0: initialState,
+        t0: t0,
+        tEnd: tEnd,
+        h: stepSize,
+        xIndex: 0,
+        yIndex: 1,
+        zIndex: 2,
+        skipTime: 5,
+      ),
+      throwsArgumentError,
+    );
+    expect(
+      () => computeScene(
+        stepper: stepper,
+        y0: initialState,
+        t0: t0,
+        tEnd: tEnd,
+        h: stepSize,
+        xIndex: 0,
+        yIndex: 1,
+        zIndex: 2,
+        skipTime: 0.1,
+      ),
+      throwsArgumentError,
+    );
+  });
 }
