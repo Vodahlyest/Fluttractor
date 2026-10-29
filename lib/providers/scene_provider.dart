@@ -1,22 +1,19 @@
-import 'dart:typed_data';
-
-import 'package:bg_calculator/bg_calculator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttractor/calculations/bounding_sphere.dart';
 import 'package:fluttractor/calculations/scene.dart';
-import 'package:fluttractor/constant_values/indices.dart';
+import 'package:fluttractor/providers/trajectory_provider.dart';
+import 'package:fluttractor/calculations/view_axes.dart';
 
-final sceneProvider = FutureProvider<Scene>(
+final sceneProvider = FutureProvider.family<Scene, ViewAxes>(
   retry: (retryCount, error) => null,
-  (ref) {
-    return computeSceneInIsolate(
-      stepper: Rk4(system: lorenz),
-      y0: Float64List.fromList([1.0, 1.0, 1.0]),
-      t0: 0,
-      tEnd: 50,
-      h: 0.01,
-      xIndex: defaultAxes.x,
-      yIndex: defaultAxes.y,
-      zIndex: defaultAxes.z,
+  (ref, selectedAxes) async {
+    final trajectory = await ref.watch(trajectoryProvider.future);
+    final sphere = boundingSphere(
+      trajectory,
+      selectedAxes.axis1,
+      selectedAxes.axis2,
+      selectedAxes.axis3,
     );
+    return (trajectory: trajectory, sphere: sphere);
   },
 );

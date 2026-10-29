@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:fluttractor/calculations/view_axes.dart';
 import 'package:fluttractor/constant_values/indices.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttractor/providers/view_axes_provider.dart';
 import 'package:fluttractor/render/trajectory_painter.dart';
 import 'package:fluttractor/render/camera.dart';
 import 'package:fluttractor/providers/scene_provider.dart';
@@ -17,7 +19,8 @@ class _AttractorScreenState extends ConsumerState<AttractorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final scene = ref.watch(sceneProvider);
+    final ViewAxes selectedAxes = ref.watch(viewAxesProvider);
+    final scene = ref.watch(sceneProvider(selectedAxes));
     return Scaffold(
       body: scene.when(
         data: (scene) => SizedBox.expand(
@@ -29,9 +32,9 @@ class _AttractorScreenState extends ConsumerState<AttractorScreen> {
             child: CustomPaint(
               painter: TrajectoryPainter(
                 trajectory: scene.trajectory,
-                xindex: defaultAxes.x,
-                yindex: defaultAxes.y,
-                zindex: defaultAxes.z,
+                xindex: selectedAxes.axis1,
+                yindex: selectedAxes.axis2,
+                zindex: selectedAxes.axis3,
                 pointColor: Theme.of(context).colorScheme.primary,
                 camera: _camera,
                 sphere: scene.sphere,

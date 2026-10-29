@@ -1,12 +1,14 @@
 import 'dart:async';
 
+import 'package:fluttractor/constant_values/indices.dart';
 import 'package:fluttractor/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fluttractor/calculations/scene.dart';
 import 'package:fluttractor/providers/scene_provider.dart';
+import 'package:fluttractor/providers/trajectory_provider.dart';
 import 'package:fluttractor/render/trajectory_painter.dart';
+import 'package:bg_calculator/bg_calculator.dart';
 
 import 'helpers/pump_app.dart';
 
@@ -55,8 +57,9 @@ void main() {
   });
   group('scene loading tests', () {
     testWidgets('loading screen test', (tester) async {
-      final completer = Completer<Scene>();
+      final completer = Completer<Trajectory>();
       await pumpApp(tester, completer.future);
+      await tester.pump();
 
       Finder progressIndicator = find.byType(CircularProgressIndicator);
       expect(progressIndicator, findsOneWidget);
@@ -66,7 +69,7 @@ void main() {
       expect(progressIndicator, findsOneWidget);
       expect(trajectoryPaintFinder, findsNothing);
 
-      completer.complete(sceneByDefault);
+      completer.complete(trajectoryByDefault);
 
       await tester.pump();
       progressIndicator = find.byType(CircularProgressIndicator);
@@ -74,8 +77,9 @@ void main() {
       expect(trajectoryPaintFinder, findsOneWidget);
     });
     testWidgets("Future finishes with error", (tester) async {
-      final completer = Completer<Scene>();
+      final completer = Completer<Trajectory>();
       await pumpApp(tester, completer.future);
+      await tester.pump();
       completer.completeError(StateError("LOL, i broke my own app"));
       await tester.pump();
 
@@ -93,20 +97,23 @@ void main() {
       final providerContainer = ProviderContainer();
       addTearDown(providerContainer.dispose);
 
-      await tester.runAsync(() => providerContainer.read(sceneProvider.future));
+      await tester.runAsync(
+        () => providerContainer.read(sceneProvider(defaultAxes).future),
+      );
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: providerContainer,
           child: const MyApp(),
         ),
       );
+      await tester.pump();
       final progressIndicator = find.byType(CircularProgressIndicator);
       final customPaint = tester.widget<CustomPaint>(trajectoryPaintFinder);
       final painter = customPaint.painter! as TrajectoryPainter;
 
       expect(trajectoryPaintFinder, findsOneWidget);
       expect(progressIndicator, findsNothing);
-      expect(painter.trajectory.points, equals(5001));
+      expect(painter.trajectory.points, equals(20001));
     });
   });
 }

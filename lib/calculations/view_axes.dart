@@ -16,21 +16,24 @@ void checkAxes(ViewAxes chosenTriplet, int dimension) {
       chosenTriplet.axis2 < 0 ||
       chosenTriplet.axis3 < 0) {
     throw ArgumentError(
-      "One of the axis indices is negative: axis1: ${chosenTriplet.axis1}, axis2: ${chosenTriplet.axis2}, axis3: ${chosenTriplet.axis3}",
+      "One of the axis indices is negative: "
+      "axis1: ${chosenTriplet.axis1}, axis2: ${chosenTriplet.axis2}, axis3: ${chosenTriplet.axis3}",
     );
   }
   if (chosenTriplet.axis1 >= dimension ||
       chosenTriplet.axis2 >= dimension ||
       chosenTriplet.axis3 >= dimension) {
     throw ArgumentError(
-      "One of the axis indices is equal or greater than system's dimension: axis1: ${chosenTriplet.axis1}, axis2: ${chosenTriplet.axis2}, axis3: ${chosenTriplet.axis3}, dimension: $dimension",
+      "One of the axis indices is equal or greater than system's dimension: "
+      "axis1: ${chosenTriplet.axis1}, axis2: ${chosenTriplet.axis2}, axis3: ${chosenTriplet.axis3}, dimension: $dimension",
     );
   }
   if (chosenTriplet.axis1 == chosenTriplet.axis2 ||
       chosenTriplet.axis1 == chosenTriplet.axis3 ||
       chosenTriplet.axis2 == chosenTriplet.axis3) {
     throw ArgumentError(
-      "None of the axis indices should repeat: axis1: ${chosenTriplet.axis1}, axis2: ${chosenTriplet.axis2}, axis3: ${chosenTriplet.axis3}",
+      "None of the axis indices should repeat: "
+      "axis1: ${chosenTriplet.axis1}, axis2: ${chosenTriplet.axis2}, axis3: ${chosenTriplet.axis3}",
     );
   }
 }
