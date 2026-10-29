@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluttractor/providers/scene_provider.dart';
-import 'package:fluttractor/providers/trajectory_provider.dart';
 import 'package:fluttractor/render/trajectory_painter.dart';
 import 'package:bg_calculator/bg_calculator.dart';
 
