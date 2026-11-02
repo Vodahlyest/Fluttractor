@@ -2,7 +2,7 @@
 
 **Fluttractor** is a desktop application (macOS, Windows) for plotting phase portraits — including strange attractors — of systems of ordinary differential equations (ODEs).
 
-> **Status:** early development. The numerical core is complete and covered by tests. The app shows an interactive 3D view of a chaotic attractor that can be rotated with the mouse; for systems with more than three variables the view is a projection onto a chosen triple of variables. The trajectory is computed in a background isolate, so the window stays responsive.
+> **Status:** early development. The numerical core is complete and covered by tests. The app shows an interactive 3D view of a chaotic attractor that can be rotated with the mouse; for systems with more than three variables the view is a projection onto a triple of variables chosen in the window. The trajectory is computed in a background isolate, so the window stays responsive.
 
 ---
 
@@ -20,7 +20,8 @@
 | Screen-space decimation of dense trajectories (~15× faster rasterisation) | ✅ done |
 | Computation in a background isolate (Riverpod `FutureProvider`, loading and error states) | ✅ done |
 | Projection onto a triple of variables (validated; one trajectory shared by all triples) | ✅ done |
-| Choosing the triple in the UI; several views at once | 🚧 in progress |
+| Choosing the triple in the window (bottom sheet; a taken variable swaps the axes) | ✅ done |
+| Several views at once | 📋 planned (next) |
 | Adaptive step size (Dormand–Prince 5(4)) | 📋 planned |
 | Implicit method for stiff systems | 📋 planned |
 | User-defined equations (formula parser + LaTeX preview) | 📋 planned |
@@ -32,11 +33,12 @@
 
 ## Usage
 
-The window shows the hyperchaotic Rössler system (a = 0.25, b = 3, c = 0.5, d = 0.05; four variables x, y, z, w), integrated with RK4 from the point (−10, −6, 0, 10) on t ∈ [0, 200] with step h = 0.01, projected onto the triple (x, y, z). Choosing another triple in the window is the next step; for now the system and the triple are set in `lib/providers/` and `lib/constant_values/`. While the trajectory is being computed, a progress indicator is shown; if the computation fails, the error is shown instead of the picture.
+The window shows the hyperchaotic Rössler system (a = 0.25, b = 3, c = 0.5, d = 0.05; four variables x, y, z, w), integrated with RK4 from the point (−10, −6, 0, 10) on t ∈ [0, 200] with step h = 0.01, projected onto the triple (x, y, z). The system is set in `lib/providers/system_provider.dart`; the default triple in `lib/constant_values/indices.dart`. While the trajectory is being computed, a progress indicator is shown; if the computation fails, the error is shown instead of the picture.
 
 * **Drag horizontally** — rotate the attractor around the vertical axis.
 * **Drag vertically** — tilt the view, from looking straight from above to straight from below.
 * **Resize the window** — the picture is rescaled to fit; its proportions are preserved.
+* **Settings button** (top left) — opens a sheet with three rows of chips: *width*, *depth* and *height*, one row per axis of the view (as seen with the camera in its start position). Choosing a variable already used by another axis swaps the two axes, so the triple is always valid and any permutation takes one click. The camera returns to its start position whenever the triple changes.
 
 ---
 
@@ -47,8 +49,10 @@ fluttractor/
 ├── lib/                                # Flutter application
 │   ├── main.dart                       # ProviderScope at the root of the app
 │   ├── features/
+│   │   ├── custom_widgets/
+│   │   │   └── build_bottom_sheet.dart # bottom sheet with the axis chips (watches providers)
 │   │   └── viewer/
-│   │       └── attractor_screen.dart   # screen: loading / error / picture, handles mouse drag
+│   │       └── attractor_screen.dart   # screen: loading / error / picture, mouse drag, settings
 │   ├── providers/
 │   │   ├── system_provider.dart        # the ODE system being shown
 │   │   ├── trajectory_provider.dart    # FutureProvider: integrates once, in an isolate
@@ -59,7 +63,7 @@ fluttractor/
 │   ├── calculations/                   # pure computations behind a view (no Flutter widgets)
 │   │   ├── sphere.dart                 # Sphere record type
 │   │   ├── bounding_sphere.dart        # centre and radius of the visible triple of variables
-│   │   ├── view_axes.dart              # ViewAxes record type and its validation
+│   │   ├── view_axes.dart              # ViewAxes record type, validation, axis swapping
 │   │   ├── compute_trajectory.dart     # computeTrajectory(), …InIsolate()
 │   │   └── scene.dart                  # Scene = trajectory + sphere (what one view needs)
 │   └── render/                         # pure functions + painter
@@ -95,9 +99,10 @@ The numerical core lives in a separate package on purpose: it has no dependency 
 ```
  ┌──────────────────────────────── Flutter app (lib/) ─────────────────────────────────┐
  │  AttractorScreen      state: camera angles (local, ephemeral)                       │
- │        │  axes = ref.watch(viewAxesProvider)                                        │
+ │        │  axes = ref.watch(viewAxesProvider);  ref.listen → reset the camera        │
  │        │  ref.watch(sceneProvider(axes)) → loading │ error │ data(Scene)            │
  │        │  mouse drag → orbit() → new camera → setState                              │
+ │        │  settings → bottom sheet (Consumer): chip → swap → newAxes()               │
  │        ▼                                                                            │
  │  TrajectoryPainter.paint:                                                           │
  │     rotate()  →  projectFixed()  →  decimate()  →  Canvas.drawRawPoints()           │
@@ -121,8 +126,8 @@ The numerical core lives in a separate package on purpose: it has no dependency 
 ```
 
 * **Core** computes trajectories: *what* to solve (`OdeSystem`), *how* to make one step (`Stepper`), *how* to walk the whole time interval (`integrate`), *where* to store the result (`Trajectory`). `evolve` walks the interval with exactly the same steps as `integrate` but keeps only the final state — used to skip a transient now, and later for Lyapunov exponents and bifurcation diagrams, where storing whole trajectories is wasteful.
-* **Calculations** prepare what a view needs. `computeTrajectory` integrates the system; an optional `skipTime` (default 0) discards the initial part of the trajectory: the system is first advanced with `evolve` from t₀ to t₀ + `skipTime`, and only the rest is stored and shown. `computeTrajectoryInIsolate` runs it in a background isolate with `Isolate.run`. The closure captures only the function's own arguments, the inputs are copied into the new isolate and the result is moved back without copying. If the computation throws, the returned `Future` completes with the original error. A `ViewAxes` record names the triple of variables a view shows; `checkAxes` rejects negative, out-of-range and repeated indices.
-* **Providers** connect calculations to the UI, each computation keyed by exactly what it depends on. The trajectory does not depend on the triple, so `trajectoryProvider` integrates **once** (in an isolate) for the whole app; the bounding sphere does, so `sceneProvider` is a family keyed by `ViewAxes`: it awaits the shared trajectory and computes only the sphere for its triple. Switching the triple therefore never re-integrates the system, and several views (next step) will share one trajectory. `viewAxesProvider` keeps the selected triple, validates new ones against the system's dimension and resets to the default when the system changes. Automatic retry is disabled — a computation error is deterministic. The camera is *not* in a provider: it is ephemeral state of one view and stays in the widget.
+* **Calculations** prepare what a view needs. `computeTrajectory` integrates the system; an optional `skipTime` (default 0) discards the initial part of the trajectory: the system is first advanced with `evolve` from t₀ to t₀ + `skipTime`, and only the rest is stored and shown. `computeTrajectoryInIsolate` runs it in a background isolate with `Isolate.run`. The closure captures only the function's own arguments, the inputs are copied into the new isolate and the result is moved back without copying. If the computation throws, the returned `Future` completes with the original error. A `ViewAxes` record names the triple of variables a view shows; `checkAxes` rejects negative, out-of-range and repeated indices; `setAxesWithParameters` puts a variable on an axis and, if another axis already shows it, swaps the two axes.
+* **Providers** connect calculations to the UI, each computation keyed by exactly what it depends on. The trajectory does not depend on the triple, so `trajectoryProvider` integrates **once** (in an isolate) for the whole app; the bounding sphere does, so `sceneProvider` is a family keyed by `ViewAxes`: it awaits the shared trajectory and computes only the sphere for its triple. Switching the triple therefore never re-integrates the system, and several views (next step) will share one trajectory. `viewAxesProvider` keeps the selected triple, validates new ones against the system's dimension and resets to the default when the system changes. Automatic retry is disabled — a computation error is deterministic. The camera is *not* in a provider: it is ephemeral state of one view and stays in the widget; the screen resets it with `ref.listen` on the selected triple, which also covers a triple reset caused by a change of the system. The bottom sheet is a separate route in the `Navigator`, not a child of the screen, so it does not rebuild with the screen: it watches the providers itself through a `Consumer` and always computes the next triple from the current one.
 * **App** turns a trajectory into pictures. Rotation and projection are pure functions, separated from drawing, so the same projected points can later be sent either to the screen or to a vector file.
 
 ### Rendering pipeline
@@ -184,13 +189,14 @@ The core is checked against problems with known behaviour:
 * **Rotation:** identity, quarter turns (checks signs), *property-based* tests — distances between points and to the centre are preserved; *metamorphic* tests of the choice of variables and of rotation about a centre.
 * **Bounding sphere:** a cube, a single point, box centre vs. arithmetic mean, maximum distance, a 4-variable system with a chosen triple.
 * **Trajectory computation:** `computeTrajectory` gives exactly the same result as `integrate` and as the manual chain `evolve` → `integrate`; the trajectory starts exactly at t₀ + `skipTime`; a `skipTime` not shorter than the whole interval is rejected. `computeTrajectoryInIsolate` returns bit-for-bit the same trajectory, and an error inside the isolate reaches the caller with its original type.
-* **View axes:** valid triples for 3 and 4 variables pass; a negative index, an index equal to the dimension and each of the three possible repeats throw `ArgumentError` (each case breaks exactly one rule).
+* **View axes:** valid triples for 3 and 4 variables pass; a negative index, an index equal to the dimension and each of the three possible repeats throw `ArgumentError` (each case breaks exactly one rule). Swapping: a variable taken by another axis (both directions), a free variable, the same variable on the same axis, and an axis number outside 1…3 (`ArgumentError`).
 * **Providers:** the scene for a triple holds the very trajectory object from the trajectory provider and the sphere for that triple; for two different triples the trajectory is computed **once** (a call counter on the overridden provider) and shared; the selected triple starts at the default, accepts a valid triple and rejects an invalid one without changing state.
 * **Decimation:** nothing is dropped when points are far apart; first and last points are always kept; comparison is made with the last *kept* point (slow drift is preserved); the threshold is inclusive; both axes and thresholds other than 1 px are covered. Each test was checked against a deliberately broken implementation (mutation testing).
 * **Painter:** a fake canvas records what is drawn — sub-pixel points collapse to the two end points, points more than 1 px apart are all kept (so the threshold is measured in screen pixels, not in model units).
 * **Camera:** pitch is limited to ±90°.
 * **Widgets:** the screen draws with `TrajectoryPainter`; the canvas fills the window and follows its resize; `shouldRepaint` reacts to every input that changes the picture; a horizontal drag changes only yaw, a vertical drag changes only pitch, and a long drag stops pitch exactly at ±90°.
 * **Loading states:** with the trajectory provider overridden, the screen shows a progress indicator while the trajectory is pending (and keeps showing it however much time passes), switches to the picture once it arrives and the scene is built, and shows the error text — including the original message — when the computation fails.
+* **Bottom sheet:** the settings button opens it with a chip per variable and axis and the current triple highlighted; one tap updates the provider, the painter and the still-open sheet together; two taps in a row in one open sheet build on each other (a regression test for a sheet that computed every swap from the triple captured when it was opened); changing the triple resets a rotated camera.
 * **End to end:** one test runs the real providers and the real isolate (in real time, via `tester.runAsync`) and checks that the screen ends up drawing the full 20 001-point trajectory of the hyperchaotic Rössler system.
 
 ---
