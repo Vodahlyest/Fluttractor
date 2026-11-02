@@ -37,3 +37,37 @@ void checkAxes(ViewAxes chosenTriplet, int dimension) {
     );
   }
 }
+
+/// Allows to set new axis at new position for building new projection
+/// primarily used for working with systems where n (dimensions) > 3
+///
+/// - [axisNumber] is specified as the actual number of axis in ViewAxes,
+/// i.e 1, 2, 3.
+/// - if specified axis index and position are matching the original triplet,
+/// the original triplet is returned
+/// - if specified axis index is already in the original triplet under
+/// another position, axis index under desired position and desired axis index
+/// under another position are swapped placed
+/// - other cases result in new triplet with new axis index at desired
+/// place
+ViewAxes setAxesWithParameters(
+  ViewAxes currentTriplet,
+  int axisNumber,
+  int axisIndex,
+) {
+  if (!(1 <= axisNumber && axisNumber <= 3)) {
+    throw ArgumentError("axis number should be in range of [1;3]: $axisNumber");
+  }
+  final (axis1: currentAxis1, axis2: currentAxis2, axis3: currentAxis3) =
+      currentTriplet;
+  final tripletList = [currentAxis1, currentAxis2, currentAxis3];
+  final old = tripletList[axisNumber - 1];
+  final other = tripletList.indexOf(axisIndex);
+  if (other == (axisNumber - 1)) {
+    return currentTriplet;
+  } else if (other != -1) {
+    tripletList[other] = old;
+  }
+  tripletList[axisNumber - 1] = axisIndex;
+  return (axis1: tripletList[0], axis2: tripletList[1], axis3: tripletList[2]);
+}

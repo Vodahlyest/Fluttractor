@@ -38,4 +38,31 @@ void main() {
       throwsArgumentError,
     );
   });
+  group("setAxesWithParameters function tests", () {
+    test("x and y axes are switching places", () {
+      final testAxes = (axis1: 0, axis2: 1, axis3: 2);
+      final swapped = setAxesWithParameters(testAxes, 1, 1);
+      expect(swapped, equals((axis1: 1, axis2: 0, axis3: 2)));
+    });
+    test("x and z axes are switching places", () {
+      final testAxes = (axis1: 0, axis2: 1, axis3: 2);
+      final swapped = setAxesWithParameters(testAxes, 3, 0);
+      expect(swapped, equals((axis1: 2, axis2: 1, axis3: 0)));
+    });
+    test("new axis index nowhere to be found in initial triplet", () {
+      final testAxes = (axis1: 0, axis2: 1, axis3: 2);
+      final swapped = setAxesWithParameters(testAxes, 2, 3);
+      expect(swapped, equals((axis1: 0, axis2: 3, axis3: 2)));
+    });
+    test("nothing changes if the axis index already in it's place", () {
+      final testAxes = (axis1: 0, axis2: 1, axis3: 2);
+      final swapped = setAxesWithParameters(testAxes, 2, 1);
+      expect(swapped, equals(testAxes));
+    });
+    test("wrong axis number throws ArgumentError", () {
+      final testAxes = (axis1: 0, axis2: 1, axis3: 2);
+      expect(() => setAxesWithParameters(testAxes, 0, 2), throwsArgumentError);
+      expect(() => setAxesWithParameters(testAxes, 4, 2), throwsArgumentError);
+    });
+  });
 }
