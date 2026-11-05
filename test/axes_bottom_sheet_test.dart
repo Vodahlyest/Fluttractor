@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluttractor/calculations/view_axes.dart';
 import 'package:fluttractor/features/viewer/attractor_screen.dart';
-import 'package:fluttractor/providers/view_axes_provider.dart';
+import 'package:fluttractor/providers/plot_view_provider.dart';
 import 'package:fluttractor/render/trajectory_painter.dart';
 
 import 'helpers/pump_app.dart';
@@ -27,7 +27,7 @@ ViewAxes currentAxes(WidgetTester tester) {
   final container = ProviderScope.containerOf(
     tester.element(find.byType(AttractorScreen)),
   );
-  return container.read(viewAxesProvider);
+  return container.read(plotViewProvider).first.axes;
 }
 
 /// Taps the settings button and waits for the sheet to slide in.
