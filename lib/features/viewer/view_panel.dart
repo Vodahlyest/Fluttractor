@@ -49,7 +49,8 @@ class _ViewPanelState extends ConsumerState<ViewPanel> {
               onPressed: () => showModalBottomSheet(
                 context: context,
                 showDragHandle: true,
-                builder: (BuildContext context) => ViewBottomSheet(viewId: widget.view.id),
+                builder: (BuildContext context) =>
+                    ViewBottomSheet(viewId: widget.view.id),
               ),
               icon: Icon(Icons.settings),
             ),

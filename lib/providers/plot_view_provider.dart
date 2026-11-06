@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttractor/calculations/view_axes.dart';
 import 'package:fluttractor/constant_values/indices.dart';
 import 'package:fluttractor/providers/system_provider.dart';
+import 'package:fluttractor/constant_values/view_limit.dart';
 
 typedef PlotView = ({int id, ViewAxes axes});
-const int viewLimit = 4;
 
 class PlotViewNotifier extends Notifier<List<PlotView>> {
   @override
