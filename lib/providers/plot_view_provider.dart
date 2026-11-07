@@ -13,7 +13,11 @@ class PlotViewNotifier extends Notifier<List<PlotView>> {
   List<PlotView> build() {
     final system = ref.watch(systemProvider);
     checkAxes(defaultAxes, system.dimension);
-    return [(id: 0, axes: defaultAxes)];
+    return [
+      (id: 0, axes: defaultAxes),
+      (id: 1, axes: (axis1: 0, axis2: 1, axis3: 3)),
+      (id: 2, axes: (axis1: 1, axis2: 2, axis3: 3))
+    ];
   }
 
   void addNewPlotView(ViewAxes newAxes) {
