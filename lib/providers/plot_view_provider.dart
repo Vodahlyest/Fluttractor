@@ -16,7 +16,7 @@ class PlotViewNotifier extends Notifier<List<PlotView>> {
     return [
       (id: 0, axes: defaultAxes),
       (id: 1, axes: (axis1: 0, axis2: 1, axis3: 3)),
-      (id: 2, axes: (axis1: 1, axis2: 2, axis3: 3))
+      (id: 2, axes: (axis1: 1, axis2: 2, axis3: 3)),
     ];
   }
 

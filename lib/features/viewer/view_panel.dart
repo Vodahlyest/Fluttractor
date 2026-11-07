@@ -7,8 +7,9 @@ import 'package:fluttractor/providers/scene_provider.dart';
 import 'package:fluttractor/features/custom_widgets/view_bottom_list.dart';
 
 class ViewPanel extends ConsumerStatefulWidget {
-  const ViewPanel({super.key, required this.view});
+  const ViewPanel({super.key, required this.view, required this.onClose});
   final PlotView view;
+  final VoidCallback? onClose;
   @override
   ConsumerState<ViewPanel> createState() => _ViewPanelState();
 }
@@ -55,6 +56,15 @@ class _ViewPanelState extends ConsumerState<ViewPanel> {
               icon: Icon(Icons.settings),
             ),
           ),
+          if (widget.onClose != null)
+            Align(
+              alignment: AlignmentGeometry.topRight,
+              child: IconButton(
+                tooltip: "Remove view",
+                onPressed: widget.onClose,
+                icon: Icon(Icons.close),
+              ),
+            ),
         ],
       ),
       loading: () => const Center(child: CircularProgressIndicator()),
