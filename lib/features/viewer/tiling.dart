@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:fluttractor/constant_values/tile_gap.dart';
 import 'package:fluttractor/constant_values/view_limit.dart';
 
-List<Rect> buildTiles(int viewsAmount, Size screenSize, {double gap = 4.0}) {
+List<Rect> buildTiles(int viewsAmount, Size screenSize, {double gap = tileGap}) {
   final isHorizontal = screenSize.width >= screenSize.height;
   final halfWidth = screenSize.width / 2;
   final halfHeight = screenSize.height / 2;

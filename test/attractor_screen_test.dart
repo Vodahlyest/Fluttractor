@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:fluttractor/constant_values/indices.dart';
+import 'package:fluttractor/constant_values/tile_gap.dart';
 import 'package:fluttractor/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,10 +38,10 @@ void main() {
       expect(painter.camera, (yaw: 0.0, pitch: 0.0));
     });
 
-    testWidgets('canvas fills the whole screen', (tester) async {
+    testWidgets('canvas fills the whole screen except the frame', (tester) async {
       await pumpApp(tester);
 
-      expect(tester.getSize(trajectoryPaintFinder), const Size(800, 600));
+      expect(tester.getSize(trajectoryPaintFinder), const Size(800 - tileGap, 600 - tileGap));
     });
 
     testWidgets('canvas follows window resize', (tester) async {
@@ -51,7 +52,7 @@ void main() {
       tester.view.physicalSize = const Size(1200, 400);
       await tester.pump();
 
-      expect(tester.getSize(trajectoryPaintFinder), const Size(1200, 400));
+      expect(tester.getSize(trajectoryPaintFinder), const Size(1200 - tileGap, 400 - tileGap));
     });
   });
   group('scene loading tests', () {

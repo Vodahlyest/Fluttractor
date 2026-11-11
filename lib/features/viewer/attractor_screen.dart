@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttractor/constant_values/indices.dart';
+import 'package:fluttractor/constant_values/tile_gap.dart';
 import 'package:fluttractor/constant_values/view_limit.dart';
 import 'package:fluttractor/features/viewer/view_panel.dart';
 import 'package:fluttractor/features/viewer/tiling.dart';
