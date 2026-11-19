@@ -25,7 +25,7 @@ double errorNorm(
   double sumOfSquares = 0;
   for (int i = 0; i < yNew.length; i++) {
     final sc = atol + rtol * max(y[i].abs(), yNew[i].abs());
-    final r = ((errorEstimate[i] / sc) * (errorEstimate[i] / sc));
+    final r = ((errorEstimate[i] / sc));
     sumOfSquares += r * r;
   }
 
